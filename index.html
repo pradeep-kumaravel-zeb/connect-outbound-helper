@@ -3,674 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Timeline - DPE, SPNS & Chat-Bot</title>
+    <title>LCN Connect Testing Console</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-            color: #fff;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .legend-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-        }
-        .legend-dot.external { background: #ff6b6b; }
-        .legend-dot.internal { background: #ffd93d; }
-        .legend-dot.progress { background: #6bcb77; }
-        .legend-dot.vacation { background: #9b59b6; }
-        .legend-dot.milestone { background: #00d4ff; }
-
-        .modules {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        .module-tag {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .module-tag.dpe { background: #e74c3c; }
-        .module-tag.spns { background: #3498db; }
-        .module-tag.chatbot { background: #2ecc71; }
-
-        .timeline {
-            position: relative;
-            padding: 20px 0;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #00d4ff, #7b2cbf);
-            border-radius: 2px;
-        }
-        .timeline-item {
-            display: flex;
-            justify-content: flex-end;
-            padding: 10px 40px 10px 0;
-            position: relative;
-            width: 50%;
-        }
-        .timeline-item:nth-child(odd) {
-            align-self: flex-end;
-            justify-content: flex-start;
-            padding: 10px 0 10px 40px;
-            margin-left: 50%;
-        }
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            top: 15px;
-        }
-        .timeline-item:nth-child(even)::after {
-            right: -10px;
-        }
-        .timeline-item:nth-child(odd)::after {
-            left: -10px;
-        }
-        .timeline-item.external::after { background: #ff6b6b; box-shadow: 0 0 15px #ff6b6b; }
-        .timeline-item.internal::after { background: #ffd93d; box-shadow: 0 0 15px #ffd93d; }
-        .timeline-item.progress::after { background: #6bcb77; box-shadow: 0 0 15px #6bcb77; }
-        .timeline-item.vacation::after { background: #9b59b6; box-shadow: 0 0 15px #9b59b6; }
-        .timeline-item.milestone::after { background: #00d4ff; box-shadow: 0 0 15px #00d4ff; }
-
-        .timeline-content {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 450px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .timeline-content:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        .timeline-date {
-            font-size: 0.85rem;
-            color: #00d4ff;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .timeline-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .timeline-desc {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.5;
-        }
-        .module-badges {
-            display: flex;
-            gap: 6px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .badge.dpe { background: #e74c3c; }
-        .badge.spns { background: #3498db; }
-        .badge.chatbot { background: #2ecc71; }
-        .badge.delay-type {
-            background: transparent;
-            border: 1px solid;
-        }
-        .badge.delay-type.ext { border-color: #ff6b6b; color: #ff6b6b; }
-        .badge.delay-type.int { border-color: #ffd93d; color: #ffd93d; }
-
-        .summary {
-            margin-top: 60px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .summary-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .summary-card h3 {
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        .summary-card.external h3 { color: #ff6b6b; }
-        .summary-card.internal h3 { color: #ffd93d; }
-        .summary-card ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        .summary-card li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .summary-card li:last-child { border-bottom: none; }
-
-        @media (max-width: 768px) {
-            .timeline::before { left: 20px; }
-            .timeline-item, .timeline-item:nth-child(odd) {
-                width: 100%;
-                margin-left: 0;
-                padding: 10px 0 10px 50px;
-                justify-content: flex-start;
-            }
-            .timeline-item::after, .timeline-item:nth-child(odd)::after {
-                left: 10px;
-                right: auto;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 24px; }
+        h1 { color: #2c3e50; margin-bottom: 8px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 24px; }
+        .config { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
+        .config label { display: block; font-weight: 600; margin-bottom: 4px; color: #34495e; }
+        .config input, .config select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px; margin-right: 12px; margin-bottom: 12px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .btn-success { background: #27ae60; color: white; padding: 6px 16px; font-size: 13px; }
+        .btn-success:hover { background: #219a52; }
+        .btn-success:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .status { margin-top: 12px; padding: 10px; border-radius: 4px; display: none; }
+        .status.info { display: block; background: #d4edda; color: #155724; }
+        .status.error { display: block; background: #f8d7da; color: #721c24; }
+        .status.loading { display: block; background: #fff3cd; color: #856404; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th { background: #2c3e50; color: white; padding: 12px 16px; text-align: left; font-size: 13px; }
+        td { padding: 10px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:hover { background: #f8f9fa; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-job { background: #e74c3c; color: white; }
+        .badge-quote { background: #f39c12; color: white; }
+        .badge-rejected { background: #9b59b6; color: white; }
+        .badge-lead { background: #3498db; color: white; }
+        .call-status { font-size: 12px; font-weight: 600; }
+        .call-status.success { color: #27ae60; }
+        .call-status.failed { color: #e74c3c; }
+        .empty { text-align: center; padding: 40px; color: #95a5a6; }
+        .summary { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; display: flex; gap: 24px; }
+        .summary-item { font-size: 14px; }
+        .summary-item strong { color: #2c3e50; }
+        .msg-preview { max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+        .msg-preview:hover { white-space: normal; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Project Timeline</h1>
-        
-        <div class="modules">
-            <span class="module-tag dpe">DPE</span>
-            <span class="module-tag spns">SPNS</span>
-            <span class="module-tag chatbot">Chat-Bot</span>
-        </div>
+    <h1>LCN Connect Testing Console</h1>
+    <p class="subtitle">Preview and manually trigger connect calls one at a time</p>
 
-        <div class="legend">
-            <div class="legend-item"><span class="legend-dot external"></span> External Delay (Client)</div>
-            <div class="legend-item"><span class="legend-dot internal"></span> Internal Delay (Team)</div>
-            <div class="legend-item"><span class="legend-dot progress"></span> Progress/Delivery</div>
-            <div class="legend-item"><span class="legend-dot vacation"></span> Vacation/Holiday</div>
-            <div class="legend-item"><span class="legend-dot milestone"></span> Milestone</div>
-        </div>
-
-        <div class="timeline">
-
-            <!-- Dec 5 - UAT Release -->
-            <div class="timeline-item milestone">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 5, 2025</div>
-                    <div class="timeline-title">SPNS/DPE UAT Release</div>
-                    <div class="timeline-desc">DPE module released to UAT environment for client testing.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 10 - Client confusion -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 10, 2025</div>
-                    <div class="timeline-title">Client Data Point Confusion</div>
-                    <div class="timeline-desc">Client started testing but needed clarification on DPE data points. This was already explained during FRD walkthrough - team re-explained via Slack.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 11 - Raw data request -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 11, 2025</div>
-                    <div class="timeline-title">Raw Data Excel Request</div>
-                    <div class="timeline-desc">Client requested raw data for DPE and SPNS as Excel files (EOD request).</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 12 - Team fix -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 12, 2025</div>
-                    <div class="timeline-title">Raw Excel Implementation</div>
-                    <div class="timeline-desc">Team modified code to include raw Excel content and pushed for client testing.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 13 - Client explanation request -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 13, 2025</div>
-                    <div class="timeline-title">DPE Data Source Explanation Request</div>
-                    <div class="timeline-desc">Client asked for explanation on where DPE data is being fetched from (EOD).</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 14 - Internal delays -->
-            <div class="timeline-item internal">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 14, 2025</div>
-                    <div class="timeline-title">Internal Priorities Conflict</div>
-                    <div class="timeline-desc">Team was occupied with chat-bot issues and internal calls regarding project delays. Started preparing client documentation afterwards.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge delay-type int">Internal Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 15 - Documentation -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 15, 2025</div>
-                    <div class="timeline-title">DPE Explanation Document Delivered</div>
-                    <div class="timeline-desc">Team posted DPE explanation document containing queries used for metrics in DPE email content.</div>
-                    <div class="module-badges"><span class="badge dpe">DPE</span></div>
-                </div>
-            </div>
-
-            <!-- Dec 16 - Query changes -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 16, 2025</div>
-                    <div class="timeline-title">Query Level Changes Requested</div>
-                    <div class="timeline-desc">Client posted list of query changes for DPE. Also requested SPNS change for 90-day overdue payments. Team pushed SPNS fix but client missed it (went to spam).</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 17 - Currency & Call -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 17, 2025</div>
-                    <div class="timeline-title">New Requirements (Not in FRD)</div>
-                    <div class="timeline-desc">Client requested currency variations per country - NOT discussed in original FRD. Call scheduled to discuss DPE column name changes and query modifications.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 19 - Bot Builder UAT -->
-            <div class="timeline-item milestone">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 19, 2025</div>
-                    <div class="timeline-title">Bot Builder UAT Release</div>
-                    <div class="timeline-desc">Bot-Builder module released to UAT.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Dec 19 - Jan 5 Vacation -->
-            <div class="timeline-item vacation">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 19 - January 5</div>
-                    <div class="timeline-title">Christmas Vacation Period</div>
-                    <div class="timeline-desc">Client on vacation. Team continued working on Chat-bot SIT issues and DPE/SPNS fixes during this period.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge chatbot">Chat-Bot</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 22 - Code Review -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 22, 2025</div>
-                    <div class="timeline-title">Chat-Bot Code Review Complete</div>
-                    <div class="timeline-desc">Code review completed for Chat-bot module.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Dec 23 - Code Review Changes -->
-            <div class="timeline-item internal">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 23, 2025</div>
-                    <div class="timeline-title">Chat-Bot Code Review Changes</div>
-                    <div class="timeline-desc">Team was working on chat-bot code review changes. There were bugs in the initial build as well.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge delay-type int">Internal Delay - Bugs</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 24 - Dev Pre-verification -->
-            <div class="timeline-item internal">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 24, 2025</div>
-                    <div class="timeline-title">Chat-Bot Dev Pre-verification</div>
-                    <div class="timeline-desc">Dev pre-verification completed. Code had bugs that needed fixing.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge delay-type int">Internal Delay - Bugs</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 26 - Dev-Pre Issues Fixed -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 26, 2025</div>
-                    <div class="timeline-title">Dev-Pre Issues Fixed</div>
-                    <div class="timeline-desc">Team fixed the issues mentioned in the dev-pre verification.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Dec 29 - Positive Walkthrough -->
-            <div class="timeline-item internal">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 29, 2025</div>
-                    <div class="timeline-title">Positive Walkthrough with Bugs</div>
-                    <div class="timeline-desc">Positive walkthrough was conducted on 29th December. However, bugs were identified in the chat-bot once again.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge delay-type int">Internal Delay - Bugs</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 30 - Issues Completed & BEA Delay -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 30, 2025</div>
-                    <div class="timeline-title">Issues Completed - BEA Testing Delayed</div>
-                    <div class="timeline-desc">The issues were completed by December 30th. </div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge dpe">DPE</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dec 31 - Chat-Bot Fixes -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">December 31, 2025</div>
-                    <div class="timeline-title">Positive walkthrough Issues Fully Fixed</div>
-                    <div class="timeline-desc">Due to emergencies, BEA team couldn't start the testing by 31st.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 2 - SIT Start -->
-            <div class="timeline-item milestone">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 2, 2026</div>
-                    <div class="timeline-title">Chat-Bot SIT Started</div>
-                    <div class="timeline-desc">System Integration Testing began for Chat-bot module.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 6 - SIT 1 Complete -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 6, 2026</div>
-                    <div class="timeline-title">SIT 1 Complete & Client Sync</div>
-                    <div class="timeline-desc">Chat-bot SIT 1 completed. CR documentation prepared. Sync-up with client: informed DPE/SPNS UAT issues fixed, job scheduling doubts clarified.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge chatbot">Chat-Bot</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 7 - Phone number issue -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 7, 2026</div>
-                    <div class="timeline-title">Contradicting Requirements</div>
-                    <div class="timeline-desc">Jesse reported phone numbers not right for SPNS. Contradiction: Client previously asked for primary phone only, now wants any available phone number.</div>
-                    <div class="module-badges">
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay - Contradicting Req</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 8 - Query doc -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 8, 2026</div>
-                    <div class="timeline-title">Updated Queries Document</div>
-                    <div class="timeline-desc">Team provided .md file with all updated DPE queries to Jesse.</div>
-                    <div class="module-badges"><span class="badge dpe">DPE</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 9 - More changes -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 9, 2026</div>
-                    <div class="timeline-title">Another Round of Query Changes</div>
-                    <div class="timeline-desc">Client posted another list of query changes.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge delay-type ext">External Delay</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 12 - Fix & No response -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 12, 2026</div>
-                    <div class="timeline-title">Fixes Delivered - No Response</div>
-                    <div class="timeline-desc">Team fixed changes and provided build for retesting. Reminder sent but no response from Jesse.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay - No Response</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 13 - SIT 2 & Release -->
-            <div class="timeline-item milestone">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 13, 2026</div>
-                    <div class="timeline-title">Chat-Bot Released to Client</div>
-                    <div class="timeline-desc">SIT 2 completed (started Jan 9). Chat-bot released to client for UAT.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 14 - No testing -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 14, 2026</div>
-                    <div class="timeline-title">No Testing Activity</div>
-                    <div class="timeline-desc">No testing logged or issues posted by client.</div>
-                    <div class="module-badges">
-                        <span class="badge chatbot">Chat-Bot</span>
-                        <span class="badge delay-type ext">External Delay - No Testing</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 15-18 - Team Holiday -->
-            <div class="timeline-item vacation">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 15-18, 2026</div>
-                    <div class="timeline-title">Team Holiday</div>
-                    <div class="timeline-desc">Team on holiday break.</div>
-                    <div class="module-badges"><span class="badge delay-type int">Internal - Holiday</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 19-20 - Client testing -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 19-20, 2026</div>
-                    <div class="timeline-title">Client Testing & Bug Reports</div>
-                    <div class="timeline-desc">Jan 19: Client testing chat-bot. Jan 20: Bugs posted for chat-bot.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 21 - AWS Connect -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 21, 2026</div>
-                    <div class="timeline-title">AWS Connect Walkthrough</div>
-                    <div class="timeline-desc">AWS Connect walkthrough given to client.</div>
-                    <div class="module-badges"><span class="badge chatbot">Chat-Bot</span></div>
-                </div>
-            </div>
-
-            <!-- Jan 22 - Verbal Sign-off & More Changes -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 22, 2026</div>
-                    <div class="timeline-title">Verbal Sign-off + New Requirements</div>
-                    <div class="timeline-desc">SPNS/DPE issues fixed, verbal sign-off given. BUT: Client requested date range instead of start date (shown in FRD), extra columns for SPNS, and DPE logic change to match their reports (NOT in FRD - invoice info for pricing).</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay -  Scope Increase</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 23 - Timezone issues -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 23, 2026</div>
-                    <div class="timeline-title">Timezone Issues Raised</div>
-                    <div class="timeline-desc">Team made query fixes, provided updated queries, triggered emails. Client posted timezone issues - NOT discussed in previous day's call.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay - New Issue</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 27 - Query Changes & Timezone Logic -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 27, 2026</div>
-                    <div class="timeline-title">Query Changes & Timezone Logic Completed</div>
-                    <div class="timeline-desc">The requested query level changes were completed and timezone logics were added. Current timezone logic took the UTC time and converted it into local timezone of the franchisee. Emails triggered for both use cases.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 28 - Deleted Records & Time Calculation -->
-            <div class="timeline-item external">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 28, 2026</div>
-                    <div class="timeline-title">Deleted Records & Time Calculation Issues</div>
-                    <div class="timeline-desc">Jesse identified that deleted events and carts were being included in the system. Jesse asked to calculate time from midnight to day end for a given start and end date.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                        <span class="badge delay-type ext">External Delay - New Issue</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jan 29-30 - Issues Fixed & Emails Triggered -->
-            <div class="timeline-item progress">
-                <div class="timeline-content">
-                    <div class="timeline-date">January 29-30, 2026</div>
-                    <div class="timeline-title">Issues Fixed & Emails Triggered</div>
-                    <div class="timeline-desc">The issue posted by Jesse was fixed and the emails for SPNS and DPE were triggered. Client was okay with the build.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feb 2 - Sign-off -->
-            <div class="timeline-item milestone">
-                <div class="timeline-content">
-                    <div class="timeline-date">February 2, 2026</div>
-                    <div class="timeline-title">Final Sign-off</div>
-                    <div class="timeline-desc">Client provided final sign-off for DPE and SPNS modules.</div>
-                    <div class="module-badges">
-                        <span class="badge dpe">DPE</span>
-                        <span class="badge spns">SPNS</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="summary" style="margin-top: 20px;">
-            <h3>UAT Bug Tracker Link : <a href="https://docs.google.com/spreadsheets/d/16-ZF2JXsM4gjeO4RULaF_hLZxPeOPZsaiF1vLXSwaGk/edit?gid=1581041675#gid=1581041675">https://docs.google.com/spreadsheets/d/16-ZF2JXsM4gjeO4RULaF_hLZxPeOPZsaiF1vLXSwaGk/edit?gid=1581041675#gid=1581041675</a></h3>
-        </div>
+    <div class="config">
+        <label>API Base URL</label>
+        <input type="text" id="baseUrl" value="https://uatbotbuilder.bprodevelopment.com" placeholder="https://uatbotbuilder.bprodevelopment.com">
+        <br>
+        <label>System ID</label>
+        <input type="number" id="systemId" value="1595">
+        <label>Franchise ID</label>
+        <input type="number" id="franchiseId" value="3515">
+        <br>
+        <button class="btn btn-primary" id="previewBtn" onclick="runPreview()">Run Preview</button>
+        <div id="status" class="status"></div>
     </div>
+
+    <div id="summary" class="summary" style="display:none;">
+        <div class="summary-item">Connect Calls: <strong id="callCount">0</strong></div>
+        <div class="summary-item">Track 1 Emails: <strong id="t1Emails">0</strong></div>
+        <div class="summary-item">Track 2 Emails: <strong id="t2Emails">0</strong></div>
+    </div>
+
+    <div id="tableContainer"></div>
+
+    <script>
+        const purposeBadge = {
+            'PENDING_JOB_SCHEDULING': '<span class="badge badge-job">Pending Job</span>',
+            'UNATTENDED_QUOTE_FOLLOWUP': '<span class="badge badge-quote">Unattended Quote</span>',
+            'REJECTED_QUOTE_REENGAGEMENT': '<span class="badge badge-rejected">Rejected Quote</span>',
+            'LEAD_FOLLOWUP': '<span class="badge badge-lead">Lead Follow-up</span>',
+        };
+
+        let pendingCalls = [];
+
+        function setStatus(msg, type) {
+            const el = document.getElementById('status');
+            el.className = 'status ' + type;
+            el.textContent = msg;
+        }
+
+        async function runPreview() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const systemId = document.getElementById('systemId').value;
+            const franchiseId = document.getElementById('franchiseId').value;
+            const btn = document.getElementById('previewBtn');
+
+            if (!baseUrl) { setStatus('Please enter the API base URL', 'error'); return; }
+
+            btn.disabled = true;
+            setStatus('Running preview... this may take a minute', 'loading');
+
+            try {
+                const resp = await fetch(baseUrl + '/schedule/v1/lead-nurturing-preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ system_id: parseInt(systemId), franchise_id: parseInt(franchiseId) })
+                });
+                const data = await resp.json();
+
+                if (data.status !== 'Success') {
+                    setStatus('Error: ' + data.message, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                pendingCalls = data.data.pending_connect_calls || [];
+                document.getElementById('callCount').textContent = pendingCalls.length;
+                document.getElementById('t1Emails').textContent = data.data.track1_emails_sent || 0;
+                document.getElementById('t2Emails').textContent = data.data.track2_emails_sent || 0;
+                document.getElementById('summary').style.display = 'flex';
+
+                renderTable();
+                setStatus('Preview complete — ' + pendingCalls.length + ' connect calls ready', 'info');
+            } catch (e) {
+                setStatus('Request failed: ' + e.message, 'error');
+            }
+            btn.disabled = false;
+        }
+
+        function renderTable() {
+            const container = document.getElementById('tableContainer');
+            if (pendingCalls.length === 0) {
+                container.innerHTML = '<div class="empty">No connect calls to display. Run a preview first.</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>#</th><th>Phone</th><th>Lead/Customer ID</th><th>Franchise</th>';
+            html += '<th>Purpose</th><th>Priority</th><th>Message</th><th>Action</th>';
+            html += '</tr></thead><tbody>';
+
+            pendingCalls.forEach((call, i) => {
+                const id = call.leadId || call.customerId || '-';
+                const type = call.leadId ? 'Lead ' + id : 'Customer ' + id;
+                const badge = purposeBadge[call.callPurpose] || call.callPurpose;
+                html += '<tr id="row-' + i + '">';
+                html += '<td>' + (i + 1) + '</td>';
+                html += '<td>' + (call.phoneNumber || '-') + '</td>';
+                html += '<td>' + type + '</td>';
+                html += '<td>' + (call.franchiseId || '-') + '</td>';
+                html += '<td>' + badge + '</td>';
+                html += '<td>' + (call.priority || '-') + '</td>';
+                html += '<td class="msg-preview" title="' + (call.callMessage || '').replace(/"/g, '&quot;') + '">' + (call.callMessage || '-') + '</td>';
+                html += '<td><button class="btn btn-success" id="btn-' + i + '" onclick="fireCall(' + i + ')">Call</button>';
+                html += '<span class="call-status" id="status-' + i + '"></span></td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function fireCall(index) {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const call = pendingCalls[index];
+            const btn = document.getElementById('btn-' + index);
+            const statusEl = document.getElementById('status-' + index);
+
+            btn.disabled = true;
+            statusEl.textContent = ' Calling...';
+            statusEl.className = 'call-status';
+
+            try {
+                const resp = await fetch(baseUrl + '/schedule/v1/lead-nurturing-call', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(call)
+                });
+                const data = await resp.json();
+
+                if (data.status === 'Success') {
+                    statusEl.textContent = ' ✓ Initiated';
+                    statusEl.className = 'call-status success';
+                } else {
+                    statusEl.textContent = ' ✗ Failed';
+                    statusEl.className = 'call-status failed';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                statusEl.textContent = ' ✗ Error';
+                statusEl.className = 'call-status failed';
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
+
