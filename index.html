@@ -41,6 +41,55 @@
         .summary-item strong { color: #2c3e50; }
         .msg-preview { max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
         .msg-preview:hover { white-space: normal; }
+
+        /* ── Help Panel ── */
+        .help-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; justify-content: flex-end;
+        }
+        .help-overlay.open { display: flex; }
+        .help-panel {
+            width: 520px; max-width: 90vw; height: 100%; background: #fff;
+            box-shadow: -4px 0 24px rgba(0,0,0,.15); overflow-y: auto; padding: 0;
+            animation: slideIn .25s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .help-header {
+            position: sticky; top: 0; background: #2c3e50; color: #fff; padding: 20px 24px;
+            display: flex; align-items: center; justify-content: space-between; z-index: 1;
+        }
+        .help-header h2 { font-size: 17px; font-weight: 600; }
+        .help-close {
+            background: rgba(255,255,255,.15); border: none; color: #fff; width: 32px; height: 32px;
+            border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .help-close:hover { background: rgba(255,255,255,.25); }
+        .help-body { padding: 24px; }
+        .help-body h3 {
+            font-size: 14px; font-weight: 700; color: #2c3e50; margin: 20px 0 8px;
+            padding-bottom: 6px; border-bottom: 1px solid #ddd;
+        }
+        .help-body h3:first-child { margin-top: 0; }
+        .help-body p, .help-body li { font-size: 13px; line-height: 1.7; color: #444; }
+        .help-body ul { padding-left: 18px; margin: 6px 0 12px; }
+        .help-body li { margin-bottom: 4px; }
+        .help-body .help-tip {
+            background: #d4edda; border-left: 3px solid #27ae60; padding: 10px 14px;
+            border-radius: 4px; margin: 12px 0; font-size: 12px; color: #155724;
+        }
+        .help-body .help-warn {
+            background: #fff3cd; border-left: 3px solid #f39c12; padding: 10px 14px;
+            border-radius: 4px; margin: 12px 0; font-size: 12px; color: #856404;
+        }
+        .help-body table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 12px; }
+        .help-body table th { background: #f5f5f5; text-align: left; padding: 8px 10px; font-weight: 600; border-bottom: 2px solid #ddd; }
+        .help-body table td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+        .help-btn {
+            position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px; border-radius: 50%;
+            background: #2c3e50; color: #fff; border: none; font-size: 20px; cursor: pointer;
+            box-shadow: 0 3px 12px rgba(0,0,0,.2); display: flex; align-items: center;
+            justify-content: center; z-index: 150; transition: all .2s;
+        }
+        .help-btn:hover { transform: scale(1.1); background: #34495e; }
     </style>
 </head>
 <body>
@@ -189,6 +238,93 @@
             }
         }
     </script>
+
+<!-- ═══════════ Help Button ═══════════ -->
+<button class="help-btn" onclick="document.getElementById('helpOverlay').classList.toggle('open')" title="Help &amp; Instructions">?</button>
+
+<!-- ═══════════ Help Panel ═══════════ -->
+<div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="help-panel">
+    <div class="help-header">
+      <h2>📖 How to Use This Console</h2>
+      <button class="help-close" onclick="document.getElementById('helpOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="help-body">
+
+      <h3>1. Overview</h3>
+      <p>This console lets you <strong>preview</strong> all connect calls that the Lead Nurturing cron job would make for a given franchise, and then <strong>manually trigger them one at a time</strong>. No calls are fired automatically — you control each one.</p>
+
+      <h3>2. Configuration Fields</h3>
+      <table>
+        <tr><th>Field</th><th>Description</th></tr>
+        <tr><td><strong>API Base URL</strong></td><td>The base URL of the Bot Builder backend (e.g., UAT or production). The preview and call endpoints are appended to this.</td></tr>
+        <tr><td><strong>System ID</strong></td><td>The system ID to run the preview for. This determines which system's franchises and data are used.</td></tr>
+        <tr><td><strong>Franchise ID</strong></td><td>The specific franchise to preview. Only this franchise's leads/customers will be processed.</td></tr>
+      </table>
+
+      <h3>3. Running a Preview</h3>
+      <ul>
+        <li>Fill in the API Base URL, System ID, and Franchise ID.</li>
+        <li>Click <strong>"Run Preview"</strong>.</li>
+        <li>The system calls <code>POST /schedule/v1/lead-nurturing-preview</code> which runs the full nurturing logic in <strong>dry-run mode</strong> — no emails are sent and no calls are made.</li>
+        <li>The response includes all pending connect calls and email counts.</li>
+      </ul>
+      <div class="help-tip">The preview runs the exact same logic as the real cron job, but with <code>dry_run=true</code>. This means it respects all business hours, permissions, schedules, and circuit breakers.</div>
+
+      <h3>4. Understanding the Results</h3>
+      <p>After a successful preview, you'll see:</p>
+      <ul>
+        <li><strong>Summary bar</strong> — Total connect calls, Track 1 emails, and Track 2 emails.</li>
+        <li><strong>Connect calls table</strong> — Each row is a pending outbound call.</li>
+      </ul>
+      <table>
+        <tr><th>Column</th><th>Description</th></tr>
+        <tr><td><strong>#</strong></td><td>Row number.</td></tr>
+        <tr><td><strong>Phone</strong></td><td>The phone number that will be called.</td></tr>
+        <tr><td><strong>Lead/Customer ID</strong></td><td>The entity type and ID (e.g., "Lead 12345").</td></tr>
+        <tr><td><strong>Franchise</strong></td><td>The franchise ID this call belongs to.</td></tr>
+        <tr><td><strong>Purpose</strong></td><td>Why this call is being made. Color-coded badges:
+          <br>🔴 <strong>Pending Job</strong> — Has approved proposals pending scheduling.
+          <br>🟠 <strong>Unattended Quote</strong> — Has open quotes with no action taken.
+          <br>🟣 <strong>Rejected Quote</strong> — Has retired/rejected quotes for re-engagement.
+          <br>🔵 <strong>Lead Follow-up</strong> — New lead follow-up (Track 2).
+        </td></tr>
+        <tr><td><strong>Priority</strong></td><td>Call priority level (1 = highest).</td></tr>
+        <tr><td><strong>Message</strong></td><td>The call script/message. Hover to see the full text.</td></tr>
+        <tr><td><strong>Action</strong></td><td>Click "Call" to trigger this specific call.</td></tr>
+      </table>
+
+      <h3>5. Triggering a Call</h3>
+      <ul>
+        <li>Click the green <strong>"Call"</strong> button on any row.</li>
+        <li>This sends a <code>POST /schedule/v1/lead-nurturing-call</code> with that specific call's payload.</li>
+        <li>The button disables while the request is in flight.</li>
+        <li><strong>✓ Initiated</strong> (green) — The call was successfully queued.</li>
+        <li><strong>✗ Failed</strong> (red) — Something went wrong. The button re-enables so you can retry.</li>
+      </ul>
+      <div class="help-warn"><strong>Each click triggers a real outbound call.</strong> This is not a simulation. Only click "Call" when you intend to actually dial the customer/lead.</div>
+
+      <h3>6. Typical Workflow</h3>
+      <ul>
+        <li><strong>Step 1:</strong> Set the API URL to your UAT/staging environment.</li>
+        <li><strong>Step 2:</strong> Enter the System ID and Franchise ID you want to test.</li>
+        <li><strong>Step 3:</strong> Click "Run Preview" to see what calls would be made.</li>
+        <li><strong>Step 4:</strong> Review the table — check phone numbers, purposes, and messages.</li>
+        <li><strong>Step 5:</strong> Click "Call" on individual rows to trigger them one by one.</li>
+      </ul>
+
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <tr><th>Issue</th><th>Resolution</th></tr>
+        <tr><td>Preview returns 0 calls</td><td>Check that the franchise has active LCN configuration, is within business hours, and has leads/quotes in the validation window.</td></tr>
+        <tr><td>"Request failed" error</td><td>Verify the API Base URL is correct and the server is running. Check browser console for CORS errors.</td></tr>
+        <tr><td>Call shows "✗ Failed"</td><td>The connect endpoint rejected the call. Check server logs for details (e.g., invalid phone number, connect service down).</td></tr>
+        <tr><td>No "Lead Follow-up" calls</td><td>Track 2 connect calls require the lead to have <code>allow_calls=true</code> and the franchise must have connect follow-up enabled.</td></tr>
+      </table>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
-
